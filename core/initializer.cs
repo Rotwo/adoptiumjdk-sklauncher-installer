@@ -6,14 +6,21 @@ internal class Initializer
 {
     public async Task StartLauncher()
     {
-        string javaPath = @"/runtime/bin/java.exe";
-        string launcherPath = @"/core/sklauncher-adoptiumjdk-script-main/static/SKLauncher.jar";
-        string args = $"-jar \"{launcherPath}\""; // Use quotes to handle spaces in paths
+        // Get the program directory
+        string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        // Paths
+        string javaPath = @"/runtime/jdk-21.0.4+7/bin/java.exe";
+        string launcherPath = @"/core/sklauncher-adoptiumjdk-script-main/static/SKlauncher-3.2.10.jar";
+        // Combine the program directory with the relative paths
+        string fullJavaPath = Path.Combine(programDirectory, javaPath.TrimStart('/'));
+        string fullLauncherPath = Path.Combine(programDirectory, launcherPath.TrimStart('/'));
+        // Set arguments
+        string args = $"-jar \"{fullLauncherPath}\""; // Use quotes to handle spaces in paths
 
         // Create a new process
         var processStartInfo = new ProcessStartInfo
         {
-            FileName = javaPath, // Path to the executable or jar
+            FileName = fullJavaPath, // Path to the executable or jar
             Arguments = args, // Arguments to pass
             RedirectStandardOutput = true, // Optional: redirect output
             RedirectStandardError = true, // Optional: redirect error output
