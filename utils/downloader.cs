@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 
 namespace adoptiumjdk_sklauncher_installer.utils
 {
@@ -11,23 +12,60 @@ namespace adoptiumjdk_sklauncher_installer.utils
     {
         public async Task Download(DownloadParams downloadParams)
         {
-            try {
-                Console.WriteLine($"Downloading {downloadParams.debug_downloadTitle}.");
-                await DownloadFileAsync(downloadParams.downloadUrl, downloadParams.downloadFileName);
+            DownloadUrl determinedDownloadUrl;
+
+            // For universal downloads
+            if (downloadParams.universal)
+            {
+                determinedDownloadUrl = downloadParams.downloadUrl[0];
+            }
+            else
+            {
+                // Determine the OS platform
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    Console.WriteLine("Detected OS: Windows");
+                    determinedDownloadUrl = Array.Find(downloadParams.downloadUrl, _downloadUrl => _downloadUrl.os == OSPlatform.Windows);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Console.WriteLine("Detected OS: Linux");
+                    determinedDownloadUrl = Array.Find(downloadParams.downloadUrl, _downloadUrl => _downloadUrl.os == OSPlatform.Linux);
+                }
+                else
+                {
+                    // Fallback: use the first download URL as default if the OS isn't Windows or Linux
+                    Console.WriteLine("OS not detected or unsupported. Using default download URL.");
+                    determinedDownloadUrl = downloadParams.downloadUrl[0];
+                }
+            }
+
+            // Ensure we have a valid URL to download
+            if (determinedDownloadUrl == null || string.IsNullOrEmpty(determinedDownloadUrl.url))
+            {
+                throw new Exception("No valid download URL found for the current OS.");
+            }
+
+            try
+            {
+                Console.WriteLine($"Downloading {downloadParams.debug_downloadTitle} from {determinedDownloadUrl.url}.");
+                await DownloadFileAsync(determinedDownloadUrl.url, determinedDownloadUrl.fileName);
                 Console.WriteLine("Download complete.");
 
                 Console.WriteLine($"Installing {downloadParams.debug_downloadTitle}");
-                ExtractZipFile(downloadParams.downloadFileName, downloadParams.extractPath);
-                Console.WriteLine($"Done.");
+                FileExtractor.ExtractZipFile(determinedDownloadUrl.fileName, downloadParams.extractPath);
+                Console.WriteLine("Installation complete.");
 
-                // Optional: Delete the downloaded file
-                File.Delete(downloadParams.downloadFileName);
-                Console.WriteLine($"{downloadParams.debug_downloadTitle} Clean-up completed.");
+                // Optional: Delete the downloaded file after extraction
+                File.Delete(determinedDownloadUrl.fileName);
+                Console.WriteLine($"{downloadParams.debug_downloadTitle} clean-up completed.");
             }
-            catch {
-                
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred during download or installation: {ex.Message}");
             }
         }
+
 
         // Method to download the file
         static async Task DownloadFileAsync(string fileUrl, string downloadPath)
@@ -43,12 +81,6 @@ namespace adoptiumjdk_sklauncher_installer.utils
                     }
                 }
             }
-        }
-
-        // Method to extract the ZIP file
-        static void ExtractZipFile(string zipPath, string extractPath)
-        {
-            ZipFile.ExtractToDirectory(zipPath, extractPath);
         }
     }
 }

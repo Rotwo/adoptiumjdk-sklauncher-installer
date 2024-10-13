@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 internal class Initializer
@@ -8,24 +9,45 @@ internal class Initializer
     {
         // Get the program directory
         string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        // Paths
-        string javaPath = @"/runtime/jdk-21.0.4+7/bin/java.exe";
-        string launcherPath = @"/core/sklauncher-adoptiumjdk-script-main/static/SKlauncher-3.2.10.jar";
+
+        // Paths (different for Windows and Linux)
+        string javaPath;
+        string launcherPath;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            // Windows-specific paths
+            javaPath = @"runtime\jdk-21.0.4+7-jre\bin\java.exe"; // Windows uses backslashes for paths
+            launcherPath = @"core\sklauncher-adoptiumjdk-script-main\static\SKlauncher-3.2.10.jar";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            // Linux-specific paths
+            javaPath = "runtime/jdk-21.0.4+7-jre/bin/java"; // Linux uses forward slashes for paths
+            launcherPath = "core/sklauncher-adoptiumjdk-script-main/static/SKlauncher-3.2.10.jar";
+        }
+        else
+        {
+            Console.WriteLine("Unsupported platform");
+            return;
+        }
+
         // Combine the program directory with the relative paths
-        string fullJavaPath = Path.Combine(programDirectory, javaPath.TrimStart('/'));
-        string fullLauncherPath = Path.Combine(programDirectory, launcherPath.TrimStart('/'));
+        string fullJavaPath = Path.Combine(programDirectory, javaPath);
+        string fullLauncherPath = Path.Combine(programDirectory, launcherPath);
+
         // Set arguments
-        string args = $"-jar \"{fullLauncherPath}\""; // Use quotes to handle spaces in paths
+        string javaArgs = $"-jar \"{fullLauncherPath}\""; // Use quotes to handle spaces in paths
 
         // Create a new process
         var processStartInfo = new ProcessStartInfo
         {
-            FileName = fullJavaPath, // Path to the executable or jar
-            Arguments = args, // Arguments to pass
+            FileName = fullJavaPath, // Path to the Java executable
+            Arguments = javaArgs,    // Arguments for the process
             RedirectStandardOutput = true, // Optional: redirect output
-            RedirectStandardError = true, // Optional: redirect error output
-            UseShellExecute = false, // Required for redirection
-            CreateNoWindow = true // Optional: no window
+            RedirectStandardError = true,  // Optional: redirect error output
+            UseShellExecute = false,       // Required for redirection
+            CreateNoWindow = true          // Optional: run without creating a window
         };
 
         try
