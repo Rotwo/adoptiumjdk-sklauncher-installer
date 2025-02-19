@@ -26,7 +26,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build projects
-      run: dotnet build . --no-restore --runtime ${{ env.DOTNET_RUNTIME }}
+      run: dotnet build adoptiumjdk-sklauncher-installer.csproj --no-restore --runtime ${{ env.DOTNET_RUNTIME }}
     - name: Archive build files
       if: always()
       uses: actions/upload-artifact@v4
