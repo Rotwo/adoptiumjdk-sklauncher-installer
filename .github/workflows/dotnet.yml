@@ -21,10 +21,12 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+    - name: Set runtime
+      run: echo "DOTNET_RUNTIME=${{ matrix.os == 'ubuntu-latest' && 'linux-x64' || 'win-x64' }}" >> $GITHUB_ENV
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore --runtime ${{ env.DOTNET_RUNTIME }}
     - name: Build
-      run: dotnet build --no-restore --runtime ${{ matrix.runtime }}
+      run: dotnet build --no-restore --runtime ${{ env.DOTNET_RUNTIME }}
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Archive build files
