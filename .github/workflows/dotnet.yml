@@ -22,7 +22,13 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Set runtime
-      run: echo "DOTNET_RUNTIME=${{ matrix.os == 'ubuntu-latest' && 'linux-x64' || 'win-x64' }}" >> $GITHUB_ENV
+      run: |
+        if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+          echo "DOTNET_RUNTIME=linux-x64" >> $GITHUB_ENV
+        else
+          echo "DOTNET_RUNTIME=win-x64" >> $GITHUB_ENV
+          setx DOTNET_RUNTIME win-x64
+        fi
     - name: Restore dependencies
       run: dotnet restore
     - name: Build projects
