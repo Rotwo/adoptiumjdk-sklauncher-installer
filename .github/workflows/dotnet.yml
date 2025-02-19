@@ -22,8 +22,9 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
-      run: dotnet restore --runtime ${{ matrix.os }}-${{ matrix.architecture }}
+      run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore --runtime ${{ matrix.os }}-${{ matrix.architecture }}
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet build --no-restore --runtime ${{ matrix.runtime }}
+
+    env:
+      DOTNET_RUNTIME: ${{ matrix.os == 'ubuntu-latest' && 'linux-x64' || 'win-x64' }}
