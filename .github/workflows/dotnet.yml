@@ -22,9 +22,16 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore --runtime ${{ matrix.runtime }}
     - name: Build
       run: dotnet build --no-restore --runtime ${{ matrix.runtime }}
-
-    env:
-      DOTNET_RUNTIME: ${{ matrix.os == 'ubuntu-latest' && 'linux-x64' || 'win-x64' }}
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+    - name: Archive build files
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-files-${{ matrix.os }}-${{ matrix.architecture }}
+        path: |
+          **/bin/Debug/*
+          **/bin/Release/*
