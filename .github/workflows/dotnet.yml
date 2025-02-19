@@ -26,10 +26,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build projects
-      run: |
-        for proj in $(find . -name '*.csproj'); do
-          dotnet build $proj --no-restore --runtime ${{ env.DOTNET_RUNTIME }}
-        done
+      run: dotnet build . --no-restore --runtime ${{ env.DOTNET_RUNTIME }}
     - name: Archive build files
       if: always()
       uses: actions/upload-artifact@v4
