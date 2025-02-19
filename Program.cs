@@ -32,7 +32,7 @@ class Program
         DownloadUrl adoptiumWindowsDownload = new DownloadUrl
         {
             os = OSPlatform.Linux,
-            url = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jre_x64_linux_hotspot_21.0.4_7.tar.gz",
+            url = "https://cdn.azul.com/zulu/bin/zulu21.40.17-ca-jdk21.0.6-linux_x64.tar.gz",
             fileName = "OpenJDK21U-jdk_x64_linux_hotspot_21.0.4_7.tar.gz"
         };
 
