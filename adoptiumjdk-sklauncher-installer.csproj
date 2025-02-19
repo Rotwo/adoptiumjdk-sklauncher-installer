@@ -10,6 +10,7 @@
     <LangVersion>12.0</LangVersion>
     <PlatformTarget>x64</PlatformTarget>
     <Version>$(VersionPrefix)1.1.3-alpha</Version>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <ItemGroup>
